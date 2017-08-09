@@ -28,9 +28,10 @@ def check_url(base_url: str) -> bool:
     print("INFO: url is valid")
     return True
 
-def check_metadata_formats(base_url: str) -> bool:
+def check_metadata_formats(base_url: str, metadata_format: str = '') -> bool:
     """Check which metadata formats are supported by the server"""
     formats_url = base_url + '?verb=ListMetadataFormats'
+    available_formats = []
     usable_formats = ( \
         '(http://www.ndltd.org/standards/metadata/etdms/1.1/)' \
         '(http://www.ndltd.org/standards/metadata/etdms/1-1/)' \
@@ -48,7 +49,16 @@ def check_metadata_formats(base_url: str) -> bool:
         else:
             star = " "
         print(star + frmt.metadataPrefix.text + '  (' + frmt.metadataNamespace.text + ')')
+        available_formats.append(frmt.metadataPrefix.text)
     print("-----------------")
+    if metadata_format != '' and metadata_format in available_formats:
+        print('INFO: using format -> ' + metadata_format)
+    elif metadata_format != '' and metadata_format not in available_formats:
+        print('INFO: requested format <' + metadata_format + '> is not available')
+        return False
+    elif metadata_format == '':
+        print('INFO: no metadata format selected. Please specify a format to complete the validation.')
+        return False
     return True
 
 
@@ -157,7 +167,7 @@ def main():
     if len(sys.argv) >= 3 and sys.argv[2]:
         metadata_format = sys.argv[2]
     else:
-        metadata_format = 'etdms'
+        metadata_format = ''
 
     if len(sys.argv) >= 4 and sys.argv[3]:
         dataset = sys.argv[3]
@@ -166,7 +176,7 @@ def main():
 
     if (check_url(url)
             and check_identify(url)
-            and check_metadata_formats(url)
+            and check_metadata_formats(url, metadata_format)
             and check_these(url, metadata_format, dataset)):
         print("Validation completed successfuly")
 
