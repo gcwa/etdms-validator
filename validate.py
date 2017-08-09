@@ -85,15 +85,15 @@ def check_identify(base_url: str) -> bool:
 
 def check_these(base_url: str, metadata_format: str, dataset: str = "") -> bool:
     """Check the first these for mandatory fields and validity"""
-    print("INFO: Validating data in `" + metadata_format + "` format")
     records_url = base_url \
         + "?verb=ListRecords" \
         + "&metadataPrefix=" + metadata_format
     if dataset != "":
         records_url += "&set=" + dataset
+        print('INFO: using set -> ' + dataset)
 
     print("INFO: requested url -> " + records_url)
-    
+
     try:
         res = requests.get(records_url)
         res.raise_for_status()
@@ -134,20 +134,20 @@ def check_these(base_url: str, metadata_format: str, dataset: str = "") -> bool:
 
     #Non repeatable fields
     if soup.thesis.date is not None and len(soup.thesis.date) > 1:
-        print("ERROR: <date> is a non-repeatable field")
+        print("ERROR: <date> is a non-repeatable field and currently appears " + len(soup.thesis.date) + ' times.')
         is_valid = False
 
     # Desired field
     if soup.thesis.subject is None or soup.thesis.subject.text == '':
-        print("WARNING: <subject> is a desired field")
+        print("WARNING: <subject> is a desired field that is not present")
     if soup.thesis.description is None or soup.thesis.description.text == '':
-        print("WARNING: <description> is a desired field")
+        print("WARNING: <description> is a desired field that is not present")
     if soup.thesis.contributor is None or soup.thesis.contributor.text == '':
-        print("WARNING: <contributor> is a desired field")
+        print("WARNING: <contributor> is a desired field that is not present")
     if (soup.thesis.degree is None 
             or soup.thesis.degree.name is None
             or soup.thesis.degree.name == ''):
-        print("WARNING: <degree><name> is a desired field")
+        print("WARNING: <degree><name> is a desired field that is not present")
 
     if not is_valid:
         print("ERROR: data is not formated properly, this feed can't be harvested")
