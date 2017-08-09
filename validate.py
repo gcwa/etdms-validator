@@ -31,15 +31,26 @@ def check_url(base_url: str) -> bool:
 def check_metadata_formats(base_url: str) -> bool:
     """Check which metadata formats are supported by the server"""
     formats_url = base_url + '?verb=ListMetadataFormats'
+    usable_formats = ( \
+        '(http://www.ndltd.org/standards/metadata/etdms/1.1/)' \
+        '(http://www.ndltd.org/standards/metadata/etdms/1-1/)' \
+        '(http://www.ndltd.org/standards/metadata/etdms/1.0/)' \
+        '(http://www.ndltd.org/standards/metadata/etdms/1-0/)' \
+    )
     res = requests.get(formats_url)
     soup = bs4.BeautifulSoup(res.text, "xml")
     formats = soup.find_all('metadataFormat')
-    print("Available metadata formats")
+    print("Available metadata formats (*=harvestable)")
     print("-----------------")
     for frmt in formats:
-        print(frmt.metadataPrefix.text + ' (' + frmt.metadataNamespace.text + ')')
+        if frmt.metadataNamespace.text in usable_formats:
+            star = "*"
+        else:
+            star = " "
+        print(star + frmt.metadataPrefix.text + '  (' + frmt.metadataNamespace.text + ')')
     print("-----------------")
     return True
+
 
 def check_identify(base_url: str) -> bool:
     """Check that the server is OAI-PMH version 2.0"""
