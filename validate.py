@@ -87,6 +87,9 @@ def check_these(base_url: str, metadata_format: str, dataset: str = "") -> bool:
     is_valid = True
 
     # Mandatory fields
+    if soup.thesis is None:
+        print("ERROR: Missing <thesis> root element, this repository can't be harvested")
+        return False
     if soup.thesis.title is None or soup.thesis.title.text == '':
         print("ERROR: Missing mandatory <title> field")
         is_valid = False
