@@ -86,6 +86,8 @@ def check_these(base_url: str, metadata_format: str, dataset: str = "") -> bool:
         return False
     is_valid = True
 
+    print("INFO: completeListSize = " + soup.resumptionToken['completeListSize'])
+
     # Mandatory fields
     if soup.thesis is None:
         print("ERROR: Missing <thesis> root element, this repository can't be harvested")
