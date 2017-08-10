@@ -107,7 +107,8 @@ def check_these(base_url: str, metadata_format: str, dataset: str = "") -> bool:
         return False
     is_valid = True
 
-    print("INFO: completeListSize = " + soup.resumptionToken['completeListSize'])
+    if soup.resumptionToken and 'completeListSize' in soup.resumptionToken:
+        print("INFO: completeListSize = " + soup.resumptionToken['completeListSize'])
 
     # Mandatory fields
     if soup.thesis is None:
