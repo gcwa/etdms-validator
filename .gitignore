@@ -22,3 +22,5 @@ nbdist/
 
 ### VisualStudio Code ###
 .vscode/
+
+venv/
