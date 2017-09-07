@@ -2,12 +2,19 @@
 
 Command line script to validate that a feed can be harvested by Library and Archives Canada for the Theses Canada Portal  https://www.bac-lac.gc.ca/eng/services/theses/Pages/theses-canada.aspx
 
+
 ## Installation
 
-Using virtualenv is recommended
+Install Python 3.5+ first. Using virtualenv is recommended
+
+    python3 -m venv venv
+    source ./venv/bin/activate
+
+Install requiremets via PIP
 
     pip install -r requirements.txt
-    
+
+
 ## Usage
 
 Check valid OAI-PMH, list available/usable metatada formats, check ORE is available
