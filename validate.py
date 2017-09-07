@@ -32,11 +32,12 @@ def check_metadata_formats(base_url: str, metadata_format: str = '') -> bool:
     """Check which metadata formats are supported by the server"""
     formats_url = base_url + '?verb=ListMetadataFormats'
     available_formats = []
+    supports_ore = False
+    found_valid_format = False
+    # Namespaces we recognise
     usable_formats = ( \
         '(http://www.ndltd.org/standards/metadata/etdms/1.1/)' \
-        '(http://www.ndltd.org/standards/metadata/etdms/1-1/)' \
-        '(http://www.ndltd.org/standards/metadata/etdms/1.0/)' \
-        '(http://www.ndltd.org/standards/metadata/etdms/1-0/)' \
+        '(http://www.ndltd.org/standards/metadata/etdms/1.0/)'
     )
     res = requests.get(formats_url)
     soup = bs4.BeautifulSoup(res.text, "xml")
@@ -46,19 +47,30 @@ def check_metadata_formats(base_url: str, metadata_format: str = '') -> bool:
     for frmt in formats:
         if frmt.metadataNamespace.text in usable_formats:
             star = "*"
+            found_valid_format = True
         else:
             star = " "
+        if frmt.metadataNamespace.text.lower() == 'http://www.w3.org/2005/Atom'.lower():
+            supports_ore = True
         print(star + frmt.metadataPrefix.text + '  (' + frmt.metadataNamespace.text + ')')
         available_formats.append(frmt.metadataPrefix.text)
     print("-----------------")
+    if supports_ore:
+        print('INFO: Server supports ORE')
+    else:
+        print('ERROR: Server does NOT support ORE')
     if metadata_format != '' and metadata_format in available_formats:
-        print('INFO: using format -> ' + metadata_format)
+        print('INFO: using format [' + metadata_format + ']')
     elif metadata_format != '' and metadata_format not in available_formats:
         print('INFO: requested format <' + metadata_format + '> is not available')
         return False
-    elif metadata_format == '':
-        print('INFO: no metadata format selected. Please specify a format to complete the validation.')
+    elif metadata_format == '' and not found_valid_format:
+        print('ERROR: no metadata correponds to a recognized namespace. Impossible to harvest')
+        return False    
+    elif metadata_format == '' and found_valid_format:
+        print('WARNING: no metadata format selected. Please specify a format to complete the validation.')
         return False
+
     return True
 
 
@@ -90,9 +102,9 @@ def check_these(base_url: str, metadata_format: str, dataset: str = "") -> bool:
         + "&metadataPrefix=" + metadata_format
     if dataset != "":
         records_url += "&set=" + dataset
-        print('INFO: using set -> ' + dataset)
+        print('INFO: using set [' + dataset + ']')
 
-    print("INFO: requested url -> " + records_url)
+    print("INFO: requested url [" + records_url + ']')
 
     try:
         res = requests.get(records_url)
@@ -151,7 +163,7 @@ def check_these(base_url: str, metadata_format: str, dataset: str = "") -> bool:
         print("WARNING: <degree><name> is a desired field that is not present")
 
     if not is_valid:
-        print("ERROR: data is not formated properly, this feed can't be harvested")
+        print("ERROR: data is not formatted properly, this feed can't be harvested")
 
     return is_valid
 
@@ -179,7 +191,7 @@ def main():
             and check_identify(url)
             and check_metadata_formats(url, metadata_format)
             and check_these(url, metadata_format, dataset)):
-        print("Validation completed successfuly")
+        print("Validation completed successfuly, metadata can be harvested")
 
 
 if __name__ == "__main__":
